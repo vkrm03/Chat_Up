@@ -33,9 +33,9 @@ function Home() {
                     <p>Express yourself with custom emojis. Personalize your messages with unique and fun graphics.</p>
                 </div>
             </div>
-            
-            <h2 className="test-text">What Our Users Say</h2>
+
             <section className="testimonials">
+                <h2 className="test-title">What Our Users Say</h2>
                 <div className="testimonial">
                     <p>"ChatUp has completely transformed the way I stay in touch with my friends and family ♥️. The user-friendly interface and reliable features make it my go-to messaging app!☺️"</p>
                     <p className="author">- Sachin</p>
