@@ -1,14 +1,20 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./assets/Home.css";
 
 function Home() {
+    const navigate = useNavigate();
+
+    const handleStartChat = () => {
+        navigate("/chat");
+    };
     return (
         <div className="main-content">
             <div className="welcome-section">
                 <div className="welcome-text">
                     <h1 >Welcome to ChatUp</h1>
                     <p>Connect with your friends and family instantly. Enjoy seamless and secure messaging.</p>
-                    <button className="start-chat-btn">Start Chatting</button>
+                    <button className="start-chat-btn" onClick={handleStartChat}>Start Chatting</button>
                 </div>
                 <div className="welcome-image">
                     <img src="./chating.png" alt="Welcome to ChatUp" />

@@ -23,7 +23,7 @@ const Footer = () => {
           <ul className="footer-social">
             <li><a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer"><i className="fab fa-facebook-f"></i></a></li>
             <li><a href="https://x.com/VikramA354575" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter"></i></a></li>
-            <li><a href="https://www.instagram.com/vkrxm_.io/" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram"></i></a></li>
+            <li><a href="https://www.instagram.com/vkrxm_zzz/" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram"></i></a></li>
             <li><a href="https://www.linkedin.com/in/vkrma/" target="_blank" rel="noopener noreferrer"><i className="fab fa-linkedin-in"></i></a></li>
           </ul>
         </div>

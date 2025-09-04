@@ -6,6 +6,8 @@ import Footer from './Footer';
 import Login from './Login';
 import Register from './Register';
 import Chat from './ChatPage';
+import JoinRoom from './JoinRoom';
+import CreateRoom from './CreateRoom';
 import NotFound from './NotFound';
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/join-room" element={<JoinRoom />} />
+          <Route path="/chat/create-room" element={<CreateRoom />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ConditionalFooter />
