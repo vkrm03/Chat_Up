@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import './assets/Room.css';
+import React, { useState } from "react";
+import "./assets/Room.css";
 
 function CreateRoom() {
-  const [roomName, setRoomName] = useState('');
+  const [roomName, setRoomName] = useState("");
 
-  const handleCreateRoom = (e) => {
+  const handleCreate = (e) => {
     e.preventDefault();
-    if (!roomName.trim()) {
-      alert('Please enter a room name.');
-      return;
-    }
-    console.log('Creating new room:', roomName);
+    alert(`Created room: ${roomName}`);
   };
 
   return (
-    <div className="room-container">
-      <div className="room-card">
-        <h2>Create a Chat Room</h2>
-        <p className="room-subtitle">Start a new conversation with friends!</p>
-
-        <form onSubmit={handleCreateRoom}>
+    <div className="roomform-container">
+      <div className="roomform-card">
+        <h2>Create a Room</h2>
+        <p className="roomform-subtitle">
+          Give your room a name and invite friends to join.
+        </p>
+        <form onSubmit={handleCreate}>
           <input
             type="text"
+            className="roomform-input"
             placeholder="Enter Room Name"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
-            className="room-input"
+            required
           />
-          <button type="submit" className="room-btn">Create Room</button>
+          <button type="submit" className="roomform-btn">
+            Create Room
+          </button>
         </form>
       </div>
     </div>

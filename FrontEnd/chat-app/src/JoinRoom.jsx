@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import './assets/Room.css';
+import React, { useState } from "react";
+import "./assets/Room.css";
 
 function JoinRoom() {
-  const [roomCode, setRoomCode] = useState('');
+  const [roomCode, setRoomCode] = useState("");
 
-  const handleJoinRoom = (e) => {
+  const handleJoin = (e) => {
     e.preventDefault();
-    if (!roomCode.trim()) {
-      alert('Please enter a room code.');
-      return;
-    }
-    console.log('Joining room with code:', roomCode);
+    alert(`Joining room: ${roomCode}`);
   };
 
   return (
-    <div className="room-container">
-      <div className="room-card">
-        <h2>Join a Chat Room</h2>
-        <p className="room-subtitle">Enter the room code to join your friends!</p>
-
-        <form onSubmit={handleJoinRoom}>
+    <div className="roomform-container">
+      <div className="roomform-card">
+        <h2>Join a Room</h2>
+        <p className="roomform-subtitle">
+          Enter the room code to join your friends and start chatting.
+        </p>
+        <form onSubmit={handleJoin}>
           <input
             type="text"
+            className="roomform-input"
             placeholder="Enter Room Code"
             value={roomCode}
             onChange={(e) => setRoomCode(e.target.value)}
-            className="room-input"
+            required
           />
-          <button type="submit" className="room-btn">Join Room</button>
+          <button type="submit" className="roomform-btn">
+            Join Now
+          </button>
         </form>
       </div>
     </div>
