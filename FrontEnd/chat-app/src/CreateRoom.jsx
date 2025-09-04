@@ -25,6 +25,14 @@ function CreateRoom() {
             onChange={(e) => setRoomName(e.target.value)}
             required
           />
+          <input
+            type="text"
+            className="roomform-input"
+            placeholder="Enter Room Password (optional)"
+            value={roomName}
+            onChange={(e) => setRoomName(e.target.value)}
+            required
+          />
           <button type="submit" className="roomform-btn">
             Create Room
           </button>
