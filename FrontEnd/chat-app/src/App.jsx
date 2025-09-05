@@ -8,6 +8,7 @@ import Register from './Register';
 import Chat from './ChatPage';
 import JoinRoom from './JoinRoom';
 import CreateRoom from './CreateRoom';
+import ChatRoom from './ChatRoom';
 import NotFound from './NotFound';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/join-room" element={<JoinRoom />} />
           <Route path="/chat/create-room" element={<CreateRoom />} />
+          <Route path="/chat/chat-room" element={<ChatRoom />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ConditionalFooter />
@@ -32,7 +34,7 @@ function App() {
 
 const ConditionalFooter = () => {
   const location = useLocation();
-  const showFooter = location.pathname !== '/chat';
+  const showFooter = location.pathname !== '/chat' && location.pathname !== '/chat/chat-room';
   return showFooter ? <Footer /> : null;
 };
 

@@ -1,12 +1,20 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./assets/Room.css";
 
 function JoinRoom() {
   const [roomCode, setRoomCode] = useState("");
+  const navigate = useNavigate();
 
   const handleJoin = (e) => {
     e.preventDefault();
-    alert(`Joining room: ${roomCode}`);
+
+    if (!roomCode.trim()) {
+      alert("Please enter a valid room code!");
+      return;
+    }
+
+    navigate(`/chat/chat-room?id=${roomCode}`);
   };
 
   return (
