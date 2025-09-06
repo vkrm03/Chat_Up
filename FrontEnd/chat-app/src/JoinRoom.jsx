@@ -4,17 +4,33 @@ import "./assets/Room.css";
 
 function JoinRoom() {
   const [roomCode, setRoomCode] = useState("");
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
 
-    if (!roomCode.trim()) {
-      alert("Please enter a valid room code!");
+    if (!roomCode.trim() || !username.trim()) {
+      alert("Please enter both room code and username!");
       return;
     }
 
-    navigate(`/chat/chat-room?id=${roomCode}`);
+    try {
+      // Check if room exists in the backend
+      const response = await fetch(`http://localhost:5000/check-room/${roomCode}`);
+      const data = await response.json();
+
+      if (!data.exists) {
+        alert("Room does not exist! Please create the room first.");
+        return;
+      }
+
+      // If room exists, navigate to chat
+      navigate(`/chat/chat-room?id=${roomCode}&username=${encodeURIComponent(username)}`);
+    } catch (error) {
+      console.error("Error checking room:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -22,7 +38,7 @@ function JoinRoom() {
       <div className="roomform-card">
         <h2>Join a Room</h2>
         <p className="roomform-subtitle">
-          Enter the room code to join your friends and start chatting.
+          Enter the room code and your username to join the chat.
         </p>
         <form onSubmit={handleJoin}>
           <input
@@ -31,6 +47,14 @@ function JoinRoom() {
             placeholder="Enter Room Code"
             value={roomCode}
             onChange={(e) => setRoomCode(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            className="roomform-input"
+            placeholder="Enter Your Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
           <button type="submit" className="roomform-btn">

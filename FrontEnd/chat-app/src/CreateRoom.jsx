@@ -5,16 +5,24 @@ import "./assets/Room.css";
 function CreateRoom() {
   const [roomName, setRoomName] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
+  const [username, setUsername] = useState(""); // ✅ NEW
   const navigate = useNavigate();
 
   const handleCreate = (e) => {
     e.preventDefault();
 
-    // Simulate a generated room ID
-    const roomId = Date.now(); 
+    if (!username.trim()) {
+      alert("Please enter your username!");
+      return;
+    }
 
-    // Redirect to Chat Room
-    navigate(`/chat/chat-room?id=${roomId}&name=${encodeURIComponent(roomName)}`);
+    // Generate a unique room ID
+    const roomId = Date.now();
+
+    // Redirect to Chat Room with username and room name
+    navigate(
+      `/chat/chat-room?id=${roomId}&name=${encodeURIComponent(roomName)}&username=${encodeURIComponent(username)}`
+    );
   };
 
   return (
@@ -22,7 +30,7 @@ function CreateRoom() {
       <div className="roomform-card">
         <h2>Create a Room</h2>
         <p className="roomform-subtitle">
-          Give your room a name and set an optional password.
+          Give your room a name, set an optional password, and enter your username.
         </p>
         <form onSubmit={handleCreate}>
           <input
@@ -39,6 +47,14 @@ function CreateRoom() {
             placeholder="Enter Room Password (optional)"
             value={roomPassword}
             onChange={(e) => setRoomPassword(e.target.value)}
+          />
+          <input
+            type="text"
+            className="roomform-input"
+            placeholder="Enter Your Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
           <button type="submit" className="roomform-btn">
             Create Room
