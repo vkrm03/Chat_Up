@@ -25,10 +25,7 @@ app.get("/", (req, res) => {
 
 app.get("/check-room/:roomId", (req, res) => {
   const { roomId } = req.params;
-  if (rooms[roomId]) {
-    return res.json({ exists: true });
-  }
-  return res.json({ exists: false });
+  res.json({ exists: !!rooms[roomId] });
 });
 
 io.on("connection", (socket) => {
@@ -36,11 +33,13 @@ io.on("connection", (socket) => {
 
   socket.on("joinRoom", ({ roomId, username }) => {
     if (!rooms[roomId]) {
-      rooms[roomId] = { messages: [], users: [] };
+      rooms[roomId] = { messages: [], users: {} };
     }
 
+    if (rooms[roomId].users[socket.id]) return;
+
+    rooms[roomId].users[socket.id] = username;
     socket.join(roomId);
-    rooms[roomId].users.push(username);
 
     console.log(`${username} joined room ${roomId}`);
 
@@ -64,24 +63,45 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("receiveMessage", message);
   });
 
-  socket.on("leaveRoom", ({ roomId, username }) => {
+  socket.on("leaveRoom", ({ roomId }) => {
+    const username = rooms[roomId]?.users[socket.id];
+    if (!username) return;
+
     socket.leave(roomId);
-    if (rooms[roomId]) {
-      rooms[roomId].users = rooms[roomId].users.filter((user) => user !== username);
-      if (rooms[roomId].users.length === 0) {
-        delete rooms[roomId];
-      }
+    delete rooms[roomId].users[socket.id];
+
+    if (Object.keys(rooms[roomId].users).length === 0) {
+      delete rooms[roomId];
     }
+
     socket.to(roomId).emit("receiveMessage", {
       sender: "System",
       text: `${username} has left the room`,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     });
+
     console.log(`${username} left room ${roomId}`);
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    for (const roomId in rooms) {
+      if (rooms[roomId].users[socket.id]) {
+        const username = rooms[roomId].users[socket.id];
+        delete rooms[roomId].users[socket.id];
+
+        socket.to(roomId).emit("receiveMessage", {
+          sender: "System",
+          text: `${username} has disconnected`,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        });
+
+        if (Object.keys(rooms[roomId].users).length === 0) {
+          delete rooms[roomId];
+        }
+
+        console.log(`${username} disconnected from room ${roomId}`);
+      }
+    }
   });
 });
 

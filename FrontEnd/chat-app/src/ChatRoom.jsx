@@ -3,45 +3,45 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import "./assets/ChatRoom.css";
 
-const socket = io("http://localhost:5000"); // Backend URL
-
 function ChatRoom() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
 
   const roomId = searchParams.get("id");
-  const username = searchParams.get("username"); // ✅ Get username from query
+  const username = searchParams.get("username");
   const roomName = searchParams.get("name") || `Room-${roomId}`;
 
   useEffect(() => {
     if (!username) {
-      // If no username, redirect back to join page
       navigate("/chat");
       return;
     }
 
-    // Join the room
-    socket.emit("joinRoom", { roomId, username });
+    const newSocket = io("http://localhost:5000", {
+      transports: ["websocket"],
+      reconnection: false,
+    });
+    setSocket(newSocket);
 
-    // Load old messages
-    socket.on("previousMessages", (msgs) => {
+    newSocket.emit("joinRoom", { roomId, username });
+
+    newSocket.on("previousMessages", (msgs) => {
       setMessages(msgs);
     });
 
-    // Listen for new messages
-    socket.on("receiveMessage", (msg) => {
+    newSocket.on("receiveMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    // Cleanup when leaving
     return () => {
-      socket.emit("leaveRoom", { roomId, username });
-      socket.off();
+      newSocket.emit("leaveRoom", { roomId });
+      newSocket.disconnect();
     };
-  }, [roomId, username]);
+  }, [roomId, username, navigate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,12 +50,12 @@ function ChatRoom() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
-
     socket.emit("sendMessage", { roomId, username, text: inputMessage });
     setInputMessage("");
   };
 
   const handleLeaveRoom = () => {
+    socket.emit("leaveRoom", { roomId });
     navigate("/chat");
   };
 
