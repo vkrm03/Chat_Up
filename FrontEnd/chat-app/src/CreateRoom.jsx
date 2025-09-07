@@ -1,25 +1,26 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./assets/Room.css";
 
 function CreateRoom() {
   const [roomName, setRoomName] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
-  const [username, setUsername] = useState(""); // ✅ NEW
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
   const handleCreate = (e) => {
     e.preventDefault();
 
     if (!username.trim()) {
-      alert("Please enter your username!");
+      toast.error("Please enter your username!");
       return;
     }
 
-    // Generate a unique room ID
     const roomId = Date.now();
 
-    // Redirect to Chat Room with username and room name
+    toast.success("Room created successfully!");
+
     navigate(
       `/chat/chat-room?id=${roomId}&name=${encodeURIComponent(roomName)}&username=${encodeURIComponent(username)}`
     );

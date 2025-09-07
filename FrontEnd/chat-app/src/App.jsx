@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import NavBar from './NavBar';
 import Home from './Home';
 import Footer from './Footer';
@@ -18,8 +19,6 @@ function App() {
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/join-room" element={<JoinRoom />} />
           <Route path="/chat/create-room" element={<CreateRoom />} />
@@ -27,6 +26,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ConditionalFooter />
+        <Toaster position="top-center" reverseOrder={false} />
       </div>
     </Router>
   );

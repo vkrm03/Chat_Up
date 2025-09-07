@@ -39,8 +39,8 @@ function NavBar() {
 
         <ul className="nav-links">
           <li><Link to="/" className="nav-item" onClick={closeMenu}>Home</Link></li>
-          <li><Link to="/register" className="nav-item" onClick={closeMenu}>Register</Link></li>
-          <li><Link to="/login" className="nav-item" onClick={closeMenu}>Login</Link></li>
+          {/* <li><Link to="/register" className="nav-item" onClick={closeMenu}>Register</Link></li>
+          <li><Link to="/login" className="nav-item" onClick={closeMenu}>Login</Link></li> */}
           <div className="nav-menu-footer">
                 <Link to="/chat" onClick={closeMenu} className="nav-btn">Chat Now</Link>
           </div>

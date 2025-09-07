@@ -5,6 +5,7 @@ import cors from "cors";
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -31,19 +32,35 @@ app.get("/check-room/:roomId", (req, res) => {
 io.on("connection", (socket) => {
   console.log("⚡ User connected:", socket.id);
 
-  socket.on("joinRoom", ({ roomId, username }) => {
+  socket.on("joinRoom", ({ roomId, username, roomName }) => {
     if (!rooms[roomId]) {
-      rooms[roomId] = { messages: [], users: {} };
+      rooms[roomId] = {
+        name: roomName || `Room-${roomId}`,
+        messages: [],
+        users: {}
+      };
     }
 
-    if (rooms[roomId].users[socket.id]) return;
+    const existingUser = Object.values(rooms[roomId].users).find(
+      (user) => user.username === username
+    );
 
-    rooms[roomId].users[socket.id] = username;
+    if (existingUser) {
+      socket.emit("joinError", {
+        error: `Username "${username}" is already active in this room.`,
+      });
+      return;
+    }
+
+    rooms[roomId].users[socket.id] = { username };
     socket.join(roomId);
 
     console.log(`${username} joined room ${roomId}`);
 
-    socket.emit("previousMessages", rooms[roomId].messages);
+    socket.emit("roomDetails", {
+      roomName: rooms[roomId].name,
+      messages: rooms[roomId].messages,
+    });
 
     socket.to(roomId).emit("receiveMessage", {
       sender: "System",
@@ -53,6 +70,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", ({ roomId, username, text }) => {
+    if (!rooms[roomId] || !rooms[roomId].users[socket.id]) return;
+
     const message = {
       id: Date.now(),
       sender: username,
@@ -64,8 +83,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", ({ roomId }) => {
-    const username = rooms[roomId]?.users[socket.id];
-    if (!username) return;
+    const user = rooms[roomId]?.users[socket.id];
+    if (!user) return;
+
+    const username = user.username;
 
     socket.leave(roomId);
     delete rooms[roomId].users[socket.id];
@@ -86,7 +107,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     for (const roomId in rooms) {
       if (rooms[roomId].users[socket.id]) {
-        const username = rooms[roomId].users[socket.id];
+        const username = rooms[roomId].users[socket.id].username;
         delete rooms[roomId].users[socket.id];
 
         socket.to(roomId).emit("receiveMessage", {

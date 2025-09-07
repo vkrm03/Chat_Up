@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./assets/Room.css";
 
 function JoinRoom() {
@@ -11,25 +12,24 @@ function JoinRoom() {
     e.preventDefault();
 
     if (!roomCode.trim() || !username.trim()) {
-      alert("Please enter both room code and username!");
+      toast.error("Please enter both room code and username!");
       return;
     }
 
     try {
-      // Check if room exists in the backend
       const response = await fetch(`http://localhost:5000/check-room/${roomCode}`);
       const data = await response.json();
 
       if (!data.exists) {
-        alert("Room does not exist! Please create the room first.");
+        toast.error("Room does not exist! Please create the room first.");
         return;
       }
 
-      // If room exists, navigate to chat
+      toast.success("Joined room successfully!");
       navigate(`/chat/chat-room?id=${roomCode}&username=${encodeURIComponent(username)}`);
     } catch (error) {
       console.error("Error checking room:", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
