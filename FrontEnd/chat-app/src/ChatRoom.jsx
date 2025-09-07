@@ -16,6 +16,7 @@ function ChatRoom() {
   const roomId = searchParams.get("id");
   const username = searchParams.get("username");
   const initialRoomName = searchParams.get("name");
+  const password = searchParams.get("password") || "";
 
   useEffect(() => {
     if (!username) {
@@ -24,13 +25,10 @@ function ChatRoom() {
       return;
     }
 
-    const newSocket = io("http://localhost:5000", {
-      transports: ["websocket"],
-      reconnection: false,
-    });
+    const newSocket = io("http://localhost:5000", { transports: ["websocket"], reconnection: false });
     setSocket(newSocket);
 
-    newSocket.emit("joinRoom", { roomId, username, roomName: initialRoomName });
+    newSocket.emit("joinRoom", { roomId, username, roomName: initialRoomName, password });
 
     newSocket.on("joinError", ({ error }) => {
       toast.error(error);
@@ -43,21 +41,17 @@ function ChatRoom() {
       setMessages(messages);
     });
 
-    newSocket.on("receiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    newSocket.on("receiveMessage", (msg) => setMessages(prev => [...prev, msg]));
 
     return () => {
       newSocket.emit("leaveRoom", { roomId });
       newSocket.disconnect();
     };
-  }, [roomId, username, navigate, initialRoomName]);
+  }, [roomId, username, navigate, initialRoomName, password]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = e => {
     e.preventDefault();
     if (!inputMessage.trim() || !socket) return;
     socket.emit("sendMessage", { roomId, username, text: inputMessage });
@@ -65,12 +59,16 @@ function ChatRoom() {
   };
 
   const handleLeaveRoom = () => {
-    if (socket) {
-      socket.emit("leaveRoom", { roomId });
-      socket.disconnect();
+    if (socket && socket.connected) {
+      socket.emit("leaveRoom", { roomId }, () => {
+        socket.disconnect();
+        toast.info("You left the room");
+        navigate("/chat");
+      });
+    } else {
+      socket?.disconnect();
+      navigate("/chat");
     }
-    toast.info("You left the room");
-    navigate("/chat");
   };
 
   return (
@@ -79,42 +77,26 @@ function ChatRoom() {
         <h2>{roomName || `Room-${roomId}`}</h2>
         <span className="room-id">Room ID: {roomId}</span>
         <span className="user-name">You: {username}</span>
-        <button className="leave-btn" onClick={handleLeaveRoom}>
-          Leave
-        </button>
+        <button className="leave-btn" onClick={handleLeaveRoom}>Leave</button>
       </div>
 
       <div className="chatroom-messages">
-        {messages.length === 0 ? (
-          <p className="no-messages">No messages yet. Start the conversation!</p>
-        ) : (
+        {messages.length === 0 ? <p className="no-messages">No messages yet. Start the conversation!</p> :
           messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`chat-message ${msg.sender === username ? "sent" : "received"}`}
-            >
+            <div key={index} className={`chat-message ${msg.sender === username ? "sent" : "received"}`}>
               <div className="message-content">
                 <span className="sender">{msg.sender}</span>
                 <p>{msg.text}</p>
                 <span className="timestamp">{msg.time}</span>
               </div>
             </div>
-          ))
-        )}
+          ))}
         <div ref={messagesEndRef} />
       </div>
 
       <form className="chatroom-input-area" onSubmit={handleSendMessage}>
-        <input
-          type="text"
-          className="chatroom-input"
-          placeholder="Type a message..."
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-        />
-        <button type="submit" className="chatroom-send-btn">
-          Send
-        </button>
+        <input type="text" className="chatroom-input" placeholder="Type a message..." value={inputMessage} onChange={e => setInputMessage(e.target.value)} />
+        <button type="submit" className="chatroom-send-btn">Send</button>
       </form>
     </div>
   );

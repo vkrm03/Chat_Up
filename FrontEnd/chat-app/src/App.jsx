@@ -4,8 +4,6 @@ import { Toaster } from 'react-hot-toast';
 import NavBar from './NavBar';
 import Home from './Home';
 import Footer from './Footer';
-import Login from './Login';
-import Register from './Register';
 import Chat from './ChatPage';
 import JoinRoom from './JoinRoom';
 import CreateRoom from './CreateRoom';
