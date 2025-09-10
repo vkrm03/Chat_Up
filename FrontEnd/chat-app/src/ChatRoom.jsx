@@ -19,37 +19,42 @@ function ChatRoom() {
   const password = searchParams.get("password") || "";
 
   useEffect(() => {
-    if (!username) {
-      toast.error("Username missing! Redirecting...");
-      navigate("/chat");
-      return;
+  if (!username) {
+    toast.error("Username missing! Redirecting...");
+    navigate("/chat");
+    return;
+  }
+
+  const newSocket = io("http://localhost:5000", { transports: ["websocket"], reconnection: false });
+  setSocket(newSocket);
+
+  newSocket.emit("joinRoom", { roomId, username, roomName: initialRoomName, password });
+
+  newSocket.on("joinError", ({ error }) => {
+    toast.error(error);
+    newSocket.disconnect();
+    navigate("/chat");
+  });
+
+  newSocket.on("roomDetails", ({ roomName, messages, users }) => {
+    setRoomName(roomName);
+    setMessages(messages);
+    const currentUser = users[newSocket.id];
+    if (currentUser?.isHost) {
+      toast.success("You are the Host of this room!");
     }
+  });
 
-    const newSocket = io("http://localhost:5000", { transports: ["websocket"], reconnection: false });
-    setSocket(newSocket);
+  newSocket.on("receiveMessage", (msg) => {
+    setMessages(prev => [...prev, msg]);
+  });
 
-    newSocket.emit("joinRoom", { roomId, username, roomName: initialRoomName, password });
+  return () => {
+    newSocket.emit("leaveRoom", { roomId });
+    newSocket.disconnect();
+  };
+}, [roomId, username, navigate, initialRoomName, password]);
 
-    newSocket.on("joinError", ({ error }) => {
-      toast.error(error);
-      newSocket.disconnect();
-      navigate("/chat");
-    });
-
-    newSocket.on("roomDetails", ({ roomName, messages }) => {
-      setRoomName(roomName);
-      setMessages(messages);
-    });
-
-    newSocket.on("receiveMessage", (msg) => {
-      setMessages(prev => [...prev, msg]);
-    });
-
-    return () => {
-      newSocket.emit("leaveRoom", { roomId });
-      newSocket.disconnect();
-    };
-  }, [roomId, username, navigate, initialRoomName, password]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -36,41 +36,52 @@ app.post("/verify-password/:roomId", (req, res) => {
 
 io.on("connection", (socket) => {
   socket.on("joinRoom", ({ roomId, username, roomName, password }) => {
-    if (!rooms[roomId]) {
-      rooms[roomId] = {
-        name: roomName || `Room-${roomId}`,
-        password: password || "",
-        messages: [],
-        users: {},
-      };
-    }
+  if (!rooms[roomId]) {
+    rooms[roomId] = {
+      name: roomName || `Room-${roomId}`,
+      password: password || "",
+      messages: [],
+      users: {},
+      hostId: socket.id,
+    };
+  }
 
-    const room = rooms[roomId];
+  const room = rooms[roomId];
 
-    if (room.password && room.password !== password) {
-      return socket.emit("joinError", { error: "Incorrect room password" });
-    }
+  if (room.password && room.password !== password) {
+    return socket.emit("joinError", { error: "Incorrect room password" });
+  }
 
-    const existingUser = Object.values(room.users).find(
-      (u) => u.username === username
-    );
-    if (existingUser) {
-      return socket.emit("joinError", {
-        error: `Username "${username}" already active.`,
-      });
-    }
-
-    room.users[socket.id] = { username };
-    socket.join(roomId);
-
-    socket.emit("roomDetails", { roomName: room.name, messages: room.messages });
-
-    socket.to(roomId).emit("receiveMessage", {
-      sender: "System",
-      text: `${username} has joined the room`,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  const existingUser = Object.values(room.users).find(
+    (u) => u.username === username
+  );
+  if (existingUser) {
+    return socket.emit("joinError", {
+      error: `Username "${username}" already active.`,
     });
+  }
+
+  room.users[socket.id] = {
+    username,
+    isHost: socket.id === room.hostId,
+  };
+
+  socket.join(roomId);
+
+  socket.emit("roomDetails", {
+    roomName: room.name,
+    messages: room.messages,
+    hostId: room.hostId,
+    users: room.users,
   });
+
+  socket.to(roomId).emit("receiveMessage", {
+    sender: "System",
+    text: `${username} has joined the room`,
+    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  });
+});
+
 
   socket.on("sendMessage", ({ roomId, username, text }) => {
     const room = rooms[roomId];
