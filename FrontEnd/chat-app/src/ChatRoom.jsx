@@ -18,7 +18,7 @@ function ChatRoom() {
   const initialRoomName = searchParams.get("name");
   const password = searchParams.get("password") || "";
 
-  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+  const SOCKET_URL = "https://chat-up-7onq.onrender.com";
 
   useEffect(() => {
     if (!username) {

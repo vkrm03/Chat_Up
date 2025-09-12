@@ -13,7 +13,7 @@ function JoinRoom() {
     if (!roomCode.trim() || !username.trim()) return toast.error("Please enter both room code and username!");
 
     try {
-      const response = await fetch(`https://chat-up-zeta.vercel.app/check-room/${roomCode}`);
+      const response = await fetch(`https://chat-up-7onq.onrender.com/check-room/${roomCode}`);
       const data = await response.json();
       if (!data.exists) return toast.error("Room does not exist!");
 
@@ -23,7 +23,7 @@ function JoinRoom() {
         if (password === null) return;
       }
 
-      const verifyRes = await fetch(`https://chat-up-zeta.vercel.app/verify-password/${roomCode}`, {
+      const verifyRes = await fetch(`https://chat-up-7onq.onrender.com/verify-password/${roomCode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
