@@ -18,43 +18,53 @@ function ChatRoom() {
   const initialRoomName = searchParams.get("name");
   const password = searchParams.get("password") || "";
 
+  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+
   useEffect(() => {
-  if (!username) {
-    toast.error("Username missing! Redirecting...");
-    navigate("/chat");
-    return;
-  }
-
-  const newSocket = io("http://localhost:5000", { transports: ["websocket"], reconnection: false });
-  setSocket(newSocket);
-
-  newSocket.emit("joinRoom", { roomId, username, roomName: initialRoomName, password });
-
-  newSocket.on("joinError", ({ error }) => {
-    toast.error(error);
-    newSocket.disconnect();
-    navigate("/chat");
-  });
-
-  newSocket.on("roomDetails", ({ roomName, messages, users }) => {
-    setRoomName(roomName);
-    setMessages(messages);
-    const currentUser = users[newSocket.id];
-    if (currentUser?.isHost) {
-      toast.success("You are the Host of this room!");
+    if (!username) {
+      toast.error("Username missing! Redirecting...");
+      navigate("/chat");
+      return;
     }
-  });
 
-  newSocket.on("receiveMessage", (msg) => {
-    setMessages(prev => [...prev, msg]);
-  });
+    const newSocket = io(SOCKET_URL, {
+      transports: ["websocket"],
+      reconnection: false,
+    });
 
-  return () => {
-    newSocket.emit("leaveRoom", { roomId });
-    newSocket.disconnect();
-  };
-}, [roomId, username, navigate, initialRoomName, password]);
+    setSocket(newSocket);
 
+    newSocket.emit("joinRoom", { roomId, username, roomName: initialRoomName, password });
+
+    newSocket.on("joinError", ({ error }) => {
+      toast.error(error);
+      newSocket.disconnect();
+      navigate("/chat");
+    });
+
+    newSocket.on("roomDetails", ({ roomName, messages, users }) => {
+      setRoomName(roomName);
+      setMessages(messages);
+      const currentUser = users[newSocket.id];
+      if (currentUser?.isHost) {
+        toast.success("You are the Host of this room!");
+      }
+    });
+
+    newSocket.on("receiveMessage", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    newSocket.on("connect_error", (err) => {
+      console.error("Connection error:", err.message);
+      toast.error("Failed to connect to server");
+    });
+
+    return () => {
+      newSocket.emit("leaveRoom", { roomId });
+      newSocket.disconnect();
+    };
+  }, [SOCKET_URL, roomId, username, navigate, initialRoomName, password]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -63,6 +73,7 @@ function ChatRoom() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputMessage.trim() || !socket) return;
+
     socket.emit("sendMessage", { roomId, username, text: inputMessage });
     setInputMessage("");
   };
@@ -86,7 +97,9 @@ function ChatRoom() {
         <h2>{roomName || `Room-${roomId}`}</h2>
         <span className="room-id">Room ID: {roomId}</span>
         <span className="user-name">You: {username}</span>
-        <button className="leave-btn" onClick={handleLeaveRoom}>Leave</button>
+        <button className="leave-btn" onClick={handleLeaveRoom}>
+          Leave
+        </button>
       </div>
 
       <div className="chatroom-messages">
@@ -117,7 +130,9 @@ function ChatRoom() {
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
         />
-        <button type="submit" className="chatroom-send-btn">Send</button>
+        <button type="submit" className="chatroom-send-btn">
+          Send
+        </button>
       </form>
     </div>
   );
