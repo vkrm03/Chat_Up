@@ -174,3 +174,11 @@
     transform: translateY(0);
   }
 }
+
+@media (max-width: 480px) {
+  .chatroom-header {
+    font-size: 14px;
+    padding: 12px 32px;
+}
+  
+}
